@@ -11,12 +11,15 @@ export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [menuPath, setMenuPath] = useState(pathname);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
     setOpen(false);
-  }, [pathname]);
+    setVisible(false);
+  }
 
   useEffect(() => {
     function onResize() {

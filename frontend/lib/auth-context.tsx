@@ -3,9 +3,8 @@
 import {
   createContext,
   useContext,
-  useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { API_URL } from "@/lib/api";
@@ -14,6 +13,7 @@ import {
   getStoredToken,
   getStoredUser,
   storeAuth,
+  subscribeAuth,
   type AuthUser,
 } from "@/lib/auth-storage";
 
@@ -52,15 +52,9 @@ async function request(path: string, body: unknown) {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    setUser(getStoredUser());
-    setToken(getStoredToken());
-    setReady(true);
-  }, []);
+  const user = useSyncExternalStore(subscribeAuth, getStoredUser, () => null);
+  const token = useSyncExternalStore(subscribeAuth, getStoredToken, () => null);
+  const ready = useSyncExternalStore(subscribeAuth, () => true, () => false);
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -80,8 +74,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         storeAuth(data.token, data.user);
-        setToken(data.token);
-        setUser(data.user);
       },
       async sendVerification(email) {
         const response = await request("/api/auth/send-verification", { email });
@@ -137,8 +129,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       logout() {
         clearAuth();
-        setToken(null);
-        setUser(null);
       },
     }),
     [user, token, ready],

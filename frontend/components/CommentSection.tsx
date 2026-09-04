@@ -45,7 +45,40 @@ export function CommentSection({ postId }: CommentSectionProps) {
   }
 
   useEffect(() => {
-    loadComments();
+    let cancelled = false;
+
+    async function run() {
+      try {
+        const response = await fetch(`${API_URL}/api/posts/${postId}/comments`);
+        const data = (await response.json()) as {
+          comments?: Comment[];
+          message?: string;
+        };
+        if (cancelled) {
+          return;
+        }
+        if (!response.ok) {
+          setError(data.message ?? "댓글을 불러오지 못했습니다.");
+          setComments([]);
+          return;
+        }
+        setComments(data.comments ?? []);
+        setError(null);
+      } catch {
+        if (!cancelled) {
+          setError("댓글을 불러오지 못했습니다.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
   }, [postId]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {

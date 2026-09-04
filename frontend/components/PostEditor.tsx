@@ -77,24 +77,24 @@ export function PostEditor({ value, onChange }: PostEditorProps) {
   );
 
   useEffect(() => {
-    const root = wrapRef.current?.querySelector(".ql-editor");
-    if (!root) {
+    const editorRoot = wrapRef.current?.querySelector(".ql-editor");
+    if (!editorRoot) {
       return;
     }
 
-    function onCompositionStart() {
-      root.classList.add("ql-composing");
-    }
+    const onCompositionStart = () => {
+      editorRoot.classList.add("ql-composing");
+    };
 
-    function onCompositionEnd() {
-      root.classList.remove("ql-composing");
-    }
+    const onCompositionEnd = () => {
+      editorRoot.classList.remove("ql-composing");
+    };
 
-    root.addEventListener("compositionstart", onCompositionStart);
-    root.addEventListener("compositionend", onCompositionEnd);
+    editorRoot.addEventListener("compositionstart", onCompositionStart);
+    editorRoot.addEventListener("compositionend", onCompositionEnd);
     return () => {
-      root.removeEventListener("compositionstart", onCompositionStart);
-      root.removeEventListener("compositionend", onCompositionEnd);
+      editorRoot.removeEventListener("compositionstart", onCompositionStart);
+      editorRoot.removeEventListener("compositionend", onCompositionEnd);
     };
   }, []);
 
