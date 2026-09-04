@@ -1,20 +1,11 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { PostForm } from "@/components/PostForm";
 import { API_URL } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-
-const PostEditor = dynamic(
-  () => import("@/components/PostEditor").then((mod) => mod.PostEditor),
-  { ssr: false, loading: () => <p className="text-sm text-muted">에디터 불러오는 중...</p> },
-);
-
-type Region = {
-  id: number;
-  name: string;
-};
+import type { Region } from "@/lib/types";
 
 export default function WritePage() {
   const router = useRouter();
@@ -25,7 +16,7 @@ export default function WritePage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (ready && !user) {
@@ -56,7 +47,7 @@ export default function WritePage() {
       return;
     }
 
-    setLoading(true);
+    setSubmitting(true);
     setError(null);
 
     try {
@@ -83,7 +74,7 @@ export default function WritePage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "게시글 등록에 실패했습니다.");
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   }
 
@@ -98,53 +89,22 @@ export default function WritePage() {
       <p className="mt-3 text-sm leading-relaxed text-muted">
         다녀온 식당과 솔직한 느낌을 남겨 주세요.
       </p>
-      <form onSubmit={onSubmit} className="mt-8 space-y-5">
-        <label className="block">
-          <span className="text-sm text-muted">지역</span>
-          <select
-            value={regionId}
-            onChange={(event) => setRegionId(event.target.value)}
-            className="field-input"
-          >
-            <option value="">지역을 선택해 주세요</option>
-            {regions.map((region) => (
-              <option key={region.id} value={region.id}>
-                {region.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-sm text-muted">맛집 이름</span>
-          <input
-            type="text"
-            value={restaurantName}
-            onChange={(event) => setRestaurantName(event.target.value)}
-            className="field-input"
-            maxLength={100}
-          />
-        </label>
-        <label className="block">
-          <span className="text-sm text-muted">제목</span>
-          <input
-            type="text"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            className="field-input"
-            maxLength={255}
-          />
-        </label>
-        <div>
-          <span className="text-sm text-muted">본문</span>
-          <div className="mt-2">
-            <PostEditor value={content} onChange={setContent} />
-          </div>
-        </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button type="submit" disabled={loading} className="btn-accent">
-          {loading ? "등록 중..." : "등록하기"}
-        </button>
-      </form>
+      <PostForm
+        regions={regions}
+        regionId={regionId}
+        restaurantName={restaurantName}
+        title={title}
+        content={content}
+        error={error}
+        submitting={submitting}
+        submitLabel="등록하기"
+        submittingLabel="등록 중..."
+        onRegionIdChange={setRegionId}
+        onRestaurantNameChange={setRestaurantName}
+        onTitleChange={setTitle}
+        onContentChange={setContent}
+        onSubmit={onSubmit}
+      />
     </main>
   );
 }

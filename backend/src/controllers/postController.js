@@ -1,18 +1,58 @@
-const { createPost, findAllPosts, findPostById } = require("../models/post");
+const {
+  createPost,
+  findAllPosts,
+  findPopularPosts,
+  findPostById,
+  updatePost,
+  deletePost,
+} = require("../models/post");
 const { findAllRegions } = require("../models/region");
+const { removeStoredImage } = require("../config/supabase");
 
 function firstImageUrl(html) {
   const match = String(html).match(/<img[^>]+src=["']([^"']+)["']/i);
   return match?.[1] ?? null;
 }
 
-async function create(req, res) {
-  const regionId = Number(req.body.region_id);
-  const restaurantName = String(req.body.restaurant_name ?? "").trim();
-  const title = String(req.body.title ?? "").trim();
-  const content = String(req.body.content ?? "").trim();
+function parsePostId(value) {
+  const id = Number(value);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+function readPostFields(body) {
+  const regionId = Number(body.region_id);
+  const restaurantName = String(body.restaurant_name ?? "").trim();
+  const title = String(body.title ?? "").trim();
+  const content = String(body.content ?? "").trim();
   const imageUrl =
-    String(req.body.image_url ?? "").trim() || firstImageUrl(content);
+    String(body.image_url ?? "").trim() || firstImageUrl(content);
+
+  return { regionId, restaurantName, title, content, imageUrl };
+}
+
+async function loadOwnedPost(req, res) {
+  const id = parsePostId(req.params.id);
+  if (!id) {
+    res.status(404).json({ message: "게시글을 찾을 수 없습니다." });
+    return null;
+  }
+
+  const post = await findPostById(id);
+  if (!post) {
+    res.status(404).json({ message: "게시글을 찾을 수 없습니다." });
+    return null;
+  }
+
+  if (Number(post.user_id) !== Number(req.user.id)) {
+    res.status(403).json({ message: "게시글을 수정하거나 삭제할 권한이 없습니다." });
+    return null;
+  }
+
+  return post;
+}
+
+async function create(req, res) {
+  const { regionId, restaurantName, title, content, imageUrl } = readPostFields(req.body);
 
   if (!regionId || !restaurantName || !title || !content) {
     return res.status(400).json({
@@ -56,8 +96,69 @@ async function list(req, res) {
   }
 }
 
+async function popular(req, res) {
+  try {
+    const posts = await findPopularPosts(5);
+    return res.json({ posts });
+  } catch (error) {
+    console.error("인기글 목록 실패:", error);
+    return res.status(500).json({ message: "인기글을 불러오지 못했습니다." });
+  }
+}
+
+async function update(req, res) {
+  try {
+    const existing = await loadOwnedPost(req, res);
+    if (!existing) {
+      return undefined;
+    }
+
+    const { regionId, restaurantName, title, content, imageUrl } = readPostFields(req.body);
+    if (!regionId || !restaurantName || !title || !content) {
+      return res.status(400).json({
+        message: "지역, 맛집 이름, 제목, 본문을 모두 입력해 주세요.",
+      });
+    }
+
+    const post = await updatePost(existing.id, {
+      regionId,
+      restaurantName,
+      title,
+      content,
+      imageUrl,
+    });
+
+    return res.status(200).json({
+      message: "게시글이 수정되었습니다.",
+      post,
+    });
+  } catch (error) {
+    console.error("게시글 수정 실패:", error);
+    return res.status(500).json({ message: "게시글 수정 중 오류가 발생했습니다." });
+  }
+}
+
+async function remove(req, res) {
+  try {
+    const existing = await loadOwnedPost(req, res);
+    if (!existing) {
+      return undefined;
+    }
+
+    await deletePost(existing.id);
+    await removeStoredImage(existing.image_url);
+
+    return res.status(200).json({
+      message: "게시글이 삭제되었습니다.",
+    });
+  } catch (error) {
+    console.error("게시글 삭제 실패:", error);
+    return res.status(500).json({ message: "게시글 삭제 중 오류가 발생했습니다." });
+  }
+}
+
 async function detail(req, res) {
-  const id = Number(req.params.id);
+  const id = parsePostId(req.params.id);
   if (!id) {
     return res.status(404).json({ message: "게시글을 찾을 수 없습니다." });
   }
@@ -84,4 +185,4 @@ async function listRegions(req, res) {
   }
 }
 
-module.exports = { create, list, detail, listRegions };
+module.exports = { create, list, popular, detail, update, remove, listRegions };

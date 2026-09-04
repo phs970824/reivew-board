@@ -8,7 +8,7 @@ export function Header() {
 
   return (
     <header className="px-6 py-5">
-      <div className="mx-auto flex w-full max-w-[720px] items-center justify-between gap-4">
+      <div className="mx-auto flex w-full max-w-[720px] items-center justify-between gap-4 md:max-w-[1100px]">
         <Link href="/" className="flex items-center gap-2 text-[17px] font-semibold tracking-tight">
           <span className="h-2 w-2 rounded-full bg-accent" />
           맛집 후기

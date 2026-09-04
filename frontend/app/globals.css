@@ -44,6 +44,21 @@ body {
   .btn-quiet {
     @apply rounded-xl px-3 py-2 text-sm text-muted transition-colors hover:text-foreground;
   }
+
+  .page-spinner {
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    border: 2px solid var(--field);
+    border-top-color: var(--accent);
+    animation: page-spin 0.7s linear infinite;
+  }
+}
+
+@keyframes page-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .ql-toolbar.ql-snow,

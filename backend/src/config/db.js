@@ -1,13 +1,36 @@
 const { Pool } = require("pg");
 
-const pool = new Pool({
-  host: process.env.DB_HOST || "localhost",
-  port: Number(process.env.DB_PORT) || 5432,
-  user: process.env.DB_USER || "appuser",
-  password: process.env.DB_PASSWORD || "apppassword",
-  database: process.env.DB_NAME || "restaurant_board",
-  max: 10,
-});
+function sslConfig() {
+  const url = process.env.DATABASE_URL || "";
+  const enabled =
+    process.env.DB_SSL === "true" ||
+    process.env.DB_SSL === "1" ||
+    /supabase\.(co|com)/i.test(url);
+
+  if (!enabled) {
+    return undefined;
+  }
+
+  return { rejectUnauthorized: false };
+}
+
+const pool = new Pool(
+  process.env.DATABASE_URL
+    ? {
+        connectionString: process.env.DATABASE_URL,
+        max: 10,
+        ssl: sslConfig(),
+      }
+    : {
+        host: process.env.DB_HOST || "localhost",
+        port: Number(process.env.DB_PORT) || 5432,
+        user: process.env.DB_USER || "appuser",
+        password: process.env.DB_PASSWORD || "apppassword",
+        database: process.env.DB_NAME || "restaurant_board",
+        max: 10,
+        ssl: sslConfig(),
+      },
+);
 
 async function testConnection({ log = false } = {}) {
   try {

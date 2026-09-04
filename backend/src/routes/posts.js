@@ -1,6 +1,6 @@
 const express = require("express");
 const { authMiddleware } = require("../middlewares/auth");
-const { create, list, detail, listRegions } = require("../controllers/postController");
+const { create, list, popular, detail, update, remove, listRegions } = require("../controllers/postController");
 
 const router = express.Router();
 
@@ -31,7 +31,16 @@ router.get("/regions", listRegions);
  *         description: 지역 ID. 없으면 전체 조회
  *     responses:
  *       200:
- *         description: 게시글 목록 반환
+ *         description: Users, Regions JOIN이 포함된 게시글 목록
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 posts:
+ *                   type: array
+ *                   items:
+ *                     $ref: "#/components/schemas/PostListItem"
  *   post:
  *     tags: [Posts]
  *     summary: 게시글 작성
@@ -70,6 +79,26 @@ router.get("/regions", listRegions);
  */
 /**
  * @openapi
+ * /api/posts/popular:
+ *   get:
+ *     tags: [Posts]
+ *     summary: 인기글 목록
+ *     description: 이미지가 있는 최신글을 우선해 상위 5개를 반환합니다.
+ *     responses:
+ *       200:
+ *         description: 인기글 목록 반환
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 posts:
+ *                   type: array
+ *                   items:
+ *                     $ref: "#/components/schemas/PostListItem"
+ */
+/**
+ * @openapi
  * /api/posts/{id}:
  *   get:
  *     tags: [Posts]
@@ -82,12 +111,94 @@ router.get("/regions", listRegions);
  *           type: integer
  *     responses:
  *       200:
- *         description: 게시글 상세 반환
+ *         description: Users, Regions JOIN이 포함된 게시글 상세
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 post:
+ *                   $ref: "#/components/schemas/PostDetail"
+ *       404:
+ *         description: 게시글 없음
+ *   put:
+ *     tags: [Posts]
+ *     summary: 게시글 수정
+ *     description: 작성자 본인만 수정할 수 있습니다. 다른 사용자의 글이면 403을 반환합니다.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [region_id, restaurant_name, title, content]
+ *             properties:
+ *               region_id:
+ *                 type: integer
+ *               restaurant_name:
+ *                 type: string
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               image_url:
+ *                 type: string
+ *                 nullable: true
+ *     responses:
+ *       200:
+ *         description: 수정된 게시글 반환
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 post:
+ *                   $ref: "#/components/schemas/PostDetail"
+ *       400:
+ *         description: 필수 값 누락
+ *       401:
+ *         description: 인증 필요
+ *       403:
+ *         description: 작성자가 아님
+ *       404:
+ *         description: 게시글 없음
+ *   delete:
+ *     tags: [Posts]
+ *     summary: 게시글 삭제
+ *     description: 작성자 본인만 삭제할 수 있습니다. 대표 이미지가 Supabase Storage에 있으면 함께 삭제합니다.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: 삭제 성공
+ *       401:
+ *         description: 인증 필요
+ *       403:
+ *         description: 작성자가 아님
  *       404:
  *         description: 게시글 없음
  */
+router.get("/posts/popular", popular);
 router.get("/posts", list);
 router.get("/posts/:id", detail);
 router.post("/posts", authMiddleware, create);
+router.put("/posts/:id", authMiddleware, update);
+router.delete("/posts/:id", authMiddleware, remove);
 
 module.exports = router;
