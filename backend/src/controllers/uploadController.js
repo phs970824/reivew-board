@@ -5,7 +5,7 @@ async function uploadImage(req, res) {
   try {
     supabase = getSupabase();
   } catch (error) {
-    console.error("Supabase 클라이언트 생성 실패:", error.message);
+    console.error("Supabase 클라이언트 생성 실패:", error);
     return res.status(500).json({ message: "스토리지 연결에 실패했습니다." });
   }
 
