@@ -23,6 +23,10 @@ function createTransporter() {
     host: config.host,
     port: config.port,
     secure: config.port === 465,
+    requireTLS: config.port !== 465,
+    connectionTimeout: 15_000,
+    greetingTimeout: 15_000,
+    socketTimeout: 15_000,
     auth: {
       user: config.user,
       pass: config.pass,
@@ -32,7 +36,7 @@ function createTransporter() {
 
 async function sendVerificationEmail(to, code, { subject } = {}) {
   const transporter = createTransporter();
-  const from = String(process.env.SMTP_USER ?? "").trim();
+  const from = String(process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "").trim();
 
   if (!transporter || !from) {
     const error = new Error("SMTP_NOT_CONFIGURED");
