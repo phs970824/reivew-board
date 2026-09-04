@@ -1,5 +1,4 @@
 const { createClient } = require("@supabase/supabase-js");
-const ws = require("ws");
 
 function getSupabase() {
   const url = process.env.SUPABASE_URL;
@@ -9,11 +8,7 @@ function getSupabase() {
     return null;
   }
 
-  return createClient(url, key, {
-    realtime: {
-      transport: ws,
-    },
-  });
+  return createClient(url, key);
 }
 
 function storagePathFromPublicUrl(imageUrl) {

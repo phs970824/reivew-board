@@ -24,6 +24,7 @@ export function PostCard({ post }: PostCardProps) {
         <h3 className="min-w-0 flex-1 truncate text-sm font-semibold transition-colors group-hover:text-accent">
           {post.title}
         </h3>
+        <span className="shrink-0 text-xs text-subtle">조회 {post.view_count ?? 0}</span>
       </div>
     </Link>
   );

@@ -9,6 +9,7 @@ import { PostNotFound } from "@/components/PostNotFound";
 import { API_URL } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import type { PostDetail, Region } from "@/lib/types";
+import { htmlToPlainText } from "@/lib/validation";
 
 export default function EditPostPage() {
   const params = useParams<{ id: string }>();
@@ -80,7 +81,7 @@ export default function EditPostPage() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const plain = content.replace(/<[^>]*>/g, "").trim();
+    const plain = htmlToPlainText(content);
 
     if (!regionId || !restaurantName.trim() || !title.trim() || !plain) {
       setError("지역, 맛집 이름, 제목, 본문을 모두 입력해 주세요.");

@@ -27,14 +27,6 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-noto-sans-kr), "Noto Sans KR", sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
-}
-
-.noto-sans-kr {
-  font-family: var(--font-noto-sans-kr), "Noto Sans KR", sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
 }
 
 @layer components {

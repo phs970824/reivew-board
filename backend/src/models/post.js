@@ -1,5 +1,9 @@
 const { pool } = require("../config/db");
 
+function extractFirstImageUrl(html) {
+  return String(html ?? "").match(/<img[^>]+src=["']([^"']+)["']/i)?.[1] ?? null;
+}
+
 async function ensurePostsTable() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS posts (
@@ -12,6 +16,10 @@ async function ensurePostsTable() {
       image_url VARCHAR(500),
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
+  `);
+  await pool.query(`
+    ALTER TABLE posts
+    ADD COLUMN IF NOT EXISTS view_count INTEGER NOT NULL DEFAULT 0
   `);
 }
 
@@ -50,6 +58,7 @@ const POST_LIST_FIELDS = `
   p.restaurant_name,
   p.image_url,
   p.created_at,
+  p.view_count,
   u.nickname,
   r.name AS region_name
 `;
@@ -104,7 +113,7 @@ async function findPopularPosts({ page = 1, limit = 5 } = {}) {
         ${POST_LIST_FIELDS}
       ${POST_FROM}
       ORDER BY
-        (p.image_url IS NOT NULL) DESC,
+        p.view_count DESC,
         p.created_at DESC
       LIMIT $1
       OFFSET $2
@@ -127,6 +136,7 @@ async function findPostById(id) {
         p.image_url,
         p.content,
         p.created_at,
+        p.view_count,
         u.nickname,
         r.name AS region_name
       ${POST_FROM}
@@ -136,6 +146,19 @@ async function findPostById(id) {
   );
 
   return result.rows[0] ?? null;
+}
+
+async function incrementPostViews(id) {
+  const result = await pool.query(
+    `
+      UPDATE posts
+      SET view_count = view_count + 1
+      WHERE id = $1
+      RETURNING view_count
+    `,
+    [id],
+  );
+  return result.rows[0]?.view_count ?? null;
 }
 
 async function updatePost(id, {
@@ -193,7 +216,7 @@ async function findGalleryPosts(limit = 9) {
   for (const row of result.rows) {
     const imageUrl =
       String(row.image_url ?? "").trim() ||
-      String(row.content ?? "").match(/<img[^>]+src=["']([^"']+)["']/i)?.[1] ||
+      extractFirstImageUrl(row.content) ||
       String(row.content ?? "").match(
         /https?:\/\/[^\s"'<>]+\.(?:png|jpe?g|gif|webp|avif)/i,
       )?.[0] ||
@@ -225,6 +248,8 @@ module.exports = {
   findPopularPosts,
   findGalleryPosts,
   findPostById,
+  incrementPostViews,
   updatePost,
   deletePost,
+  extractFirstImageUrl,
 };

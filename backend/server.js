@@ -23,7 +23,6 @@ app.use(express.json({ limit: "2mb" }));
 app.get("/", (req, res) => {
   res.json({
     message: "지역별 맛집 후기 공유 게시판 API",
-    stage: 8,
   });
 });
 

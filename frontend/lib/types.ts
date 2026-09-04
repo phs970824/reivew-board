@@ -11,6 +11,7 @@ export type PostSummary = {
   restaurant_name: string;
   image_url: string | null;
   created_at: string;
+  view_count: number;
   nickname: string;
   region_name: string;
 };

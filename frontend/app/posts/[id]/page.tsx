@@ -11,6 +11,7 @@ import { useAuth } from "@/lib/auth-context";
 import { formatDate } from "@/lib/date";
 import { sanitizePostHtml } from "@/lib/sanitize";
 import type { PostDetail } from "@/lib/types";
+import { recordPostView } from "@/lib/views";
 
 export default function PostDetailPage() {
   const params = useParams<{ id: string }>();
@@ -23,6 +24,8 @@ export default function PostDetailPage() {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function load() {
       setLoading(true);
       setNotFound(false);
@@ -33,6 +36,9 @@ export default function PostDetailPage() {
           post?: PostDetail;
           message?: string;
         };
+        if (cancelled) {
+          return;
+        }
         if (response.status === 404) {
           setNotFound(true);
           return;
@@ -42,14 +48,27 @@ export default function PostDetailPage() {
           return;
         }
         setPost(data.post);
+        const viewCount = await recordPostView(params.id);
+        if (!cancelled && viewCount != null) {
+          setPost((current) =>
+            current ? { ...current, view_count: viewCount } : current,
+          );
+        }
       } catch {
-        setError("게시글을 불러오지 못했습니다.");
+        if (!cancelled) {
+          setError("게시글을 불러오지 못했습니다.");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     load();
+    return () => {
+      cancelled = true;
+    };
   }, [params.id]);
 
   const safeHtml = useMemo(
@@ -129,7 +148,9 @@ export default function PostDetailPage() {
                 </span>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{post.nickname}</p>
-                  <p className="text-xs text-subtle">{formatDate(post.created_at)}</p>
+                  <p className="text-xs text-subtle">
+                    {formatDate(post.created_at)} · 조회 {post.view_count ?? 0}
+                  </p>
                 </div>
               </div>
               {isOwner && (

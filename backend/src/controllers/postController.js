@@ -4,16 +4,13 @@ const {
   findPopularPosts,
   findGalleryPosts,
   findPostById,
+  incrementPostViews,
   updatePost,
   deletePost,
+  extractFirstImageUrl,
 } = require("../models/post");
 const { findAllRegions } = require("../models/region");
 const { removeStoredImage } = require("../config/supabase");
-
-function firstImageUrl(html) {
-  const match = String(html).match(/<img[^>]+src=["']([^"']+)["']/i);
-  return match?.[1] ?? null;
-}
 
 function parsePostId(value) {
   const id = Number(value);
@@ -26,7 +23,7 @@ function readPostFields(body) {
   const title = String(body.title ?? "").trim();
   const content = String(body.content ?? "").trim();
   const imageUrl =
-    String(body.image_url ?? "").trim() || firstImageUrl(content);
+    String(body.image_url ?? "").trim() || extractFirstImageUrl(content);
 
   return { regionId, restaurantName, title, content, imageUrl };
 }
@@ -217,6 +214,24 @@ async function detail(req, res) {
   }
 }
 
+async function recordView(req, res) {
+  const id = parsePostId(req.params.id);
+  if (!id) {
+    return res.status(404).json({ message: "게시글을 찾을 수 없습니다." });
+  }
+
+  try {
+    const viewCount = await incrementPostViews(id);
+    if (viewCount == null) {
+      return res.status(404).json({ message: "게시글을 찾을 수 없습니다." });
+    }
+    return res.json({ view_count: viewCount });
+  } catch (error) {
+    console.error("조회수 증가 실패:", error);
+    return res.status(500).json({ message: "조회수를 반영하지 못했습니다." });
+  }
+}
+
 async function listRegions(req, res) {
   try {
     const regions = await findAllRegions();
@@ -227,4 +242,4 @@ async function listRegions(req, res) {
   }
 }
 
-module.exports = { create, list, popular, gallery, detail, update, remove, listRegions };
+module.exports = { create, list, popular, gallery, detail, recordView, update, remove, listRegions };

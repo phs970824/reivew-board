@@ -4,16 +4,8 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { EMAIL_PATTERN } from "@/lib/validation";
+import { CODE_SECONDS, EMAIL_PATTERN, formatRemain } from "@/lib/validation";
 import { PasswordField } from "@/components/PasswordField";
-
-const CODE_SECONDS = 5 * 60;
-
-function formatRemain(seconds: number) {
-  const minutes = Math.floor(seconds / 60);
-  const rest = seconds % 60;
-  return `${minutes}:${String(rest).padStart(2, "0")}`;
-}
 
 export default function SignupPage() {
   const router = useRouter();

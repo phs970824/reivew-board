@@ -53,4 +53,4 @@ async function sendVerificationEmail(to, code, { subject } = {}) {
   });
 }
 
-module.exports = { getMailerConfig, sendVerificationEmail };
+module.exports = { sendVerificationEmail };

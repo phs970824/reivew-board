@@ -1,6 +1,6 @@
 const express = require("express");
 const { authMiddleware } = require("../middlewares/auth");
-const { create, list, popular, gallery, detail, update, remove, listRegions } = require("../controllers/postController");
+const { create, list, popular, gallery, detail, recordView, update, remove, listRegions } = require("../controllers/postController");
 
 const router = express.Router();
 
@@ -108,7 +108,7 @@ router.get("/regions", listRegions);
  *   get:
  *     tags: [Posts]
  *     summary: 인기글 목록
- *     description: 이미지가 있는 최신글을 우선해 페이징합니다. 기본 한 페이지 5개입니다.
+ *     description: 조회수(view_count)가 높은 글부터 페이징합니다. 기본 한 페이지 5개입니다.
  *     parameters:
  *       - in: query
  *         name: page
@@ -272,10 +272,29 @@ router.get("/regions", listRegions);
  *                       imageUrl:
  *                         type: string
  */
+/**
+ * @openapi
+ * /api/posts/{id}/view:
+ *   post:
+ *     tags: [Posts]
+ *     summary: 조회수 증가
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: 증가된 조회수
+ *       404:
+ *         description: 게시글 없음
+ */
 router.get("/posts/gallery", gallery);
 router.get("/posts/popular", popular);
 router.get("/posts", list);
 router.get("/posts/:id", detail);
+router.post("/posts/:id/view", recordView);
 router.post("/posts", authMiddleware, create);
 router.put("/posts/:id", authMiddleware, update);
 router.delete("/posts/:id", authMiddleware, remove);
