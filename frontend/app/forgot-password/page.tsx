@@ -15,13 +15,13 @@ function formatRemain(seconds: number) {
   return `${minutes}:${String(rest).padStart(2, "0")}`;
 }
 
-export default function SignupPage() {
+export default function ForgotPasswordPage() {
   const router = useRouter();
-  const { signup, sendVerification, verifyCode } = useAuth();
+  const { sendPasswordReset, verifyResetCode, resetPassword } = useAuth();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [nickname, setNickname] = useState("");
   const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [emailVerified, setEmailVerified] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
   const [remainSeconds, setRemainSeconds] = useState(0);
@@ -63,7 +63,7 @@ export default function SignupPage() {
     setInfo(null);
 
     try {
-      await sendVerification(trimmedEmail);
+      await sendPasswordReset(trimmedEmail);
       setCode("");
       setEmailVerified(false);
       setCodeSent(true);
@@ -90,10 +90,10 @@ export default function SignupPage() {
     setInfo(null);
 
     try {
-      await verifyCode(trimmedEmail, trimmedCode);
+      await verifyResetCode(trimmedEmail, trimmedCode);
       setEmailVerified(true);
       setRemainSeconds(0);
-      setInfo("인증 완료");
+      setInfo("인증 완료. 새 비밀번호를 설정해 주세요.");
     } catch (err) {
       const message = err instanceof Error ? err.message : "인증번호 확인에 실패했습니다.";
       setError(message);
@@ -108,17 +108,6 @@ export default function SignupPage() {
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmedEmail = email.trim();
-    const trimmedNickname = nickname.trim();
-
-    if (!trimmedEmail || !password || !trimmedNickname) {
-      setError("이메일, 비밀번호, 닉네임을 모두 입력해 주세요.");
-      return;
-    }
-
-    if (!EMAIL_PATTERN.test(trimmedEmail)) {
-      setError("이메일 형식이 올바르지 않습니다.");
-      return;
-    }
 
     if (!emailVerified) {
       setError("이메일 인증이 필요합니다.");
@@ -130,8 +119,8 @@ export default function SignupPage() {
       return;
     }
 
-    if (trimmedNickname.length > 50) {
-      setError("닉네임은 50자 이하여야 합니다.");
+    if (password !== passwordConfirm) {
+      setError("새 비밀번호가 일치하지 않습니다.");
       return;
     }
 
@@ -139,14 +128,10 @@ export default function SignupPage() {
     setError(null);
 
     try {
-      await signup({
-        email: trimmedEmail,
-        password,
-        nickname: trimmedNickname,
-      });
+      await resetPassword(trimmedEmail, password);
       router.push("/login");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "회원가입에 실패했습니다.");
+      setError(err instanceof Error ? err.message : "비밀번호 변경에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -156,9 +141,9 @@ export default function SignupPage() {
     <main className="flex flex-1 flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-md">
         <p className="page-label">계정</p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight">회원가입</h1>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight">비밀번호 찾기</h1>
         <p className="mt-3 text-sm leading-relaxed text-muted">
-          이메일 인증 후 닉네임과 비밀번호로 가입해 주세요.
+          가입한 이메일로 인증한 뒤 새 비밀번호를 설정해 주세요.
         </p>
         <form onSubmit={onSubmit} className="mt-8 space-y-5">
           <div>
@@ -223,35 +208,36 @@ export default function SignupPage() {
             </div>
           )}
 
-          <label className="block">
-            <span className="text-sm text-muted">닉네임</span>
-            <input
-              type="text"
-              value={nickname}
-              onChange={(event) => setNickname(event.target.value)}
-              className="field-input"
-              autoComplete="nickname"
-              maxLength={50}
-            />
-          </label>
-          <label className="block">
-            <span className="text-sm text-muted">비밀번호</span>
-            <PasswordField
-              value={password}
-              onChange={setPassword}
-              autoComplete="new-password"
-            />
-          </label>
+          {emailVerified && (
+            <>
+              <label className="block">
+                <span className="text-sm text-muted">새 비밀번호</span>
+                <PasswordField
+                  value={password}
+                  onChange={setPassword}
+                  autoComplete="new-password"
+                />
+              </label>
+              <label className="block">
+                <span className="text-sm text-muted">새 비밀번호 확인</span>
+                <PasswordField
+                  value={passwordConfirm}
+                  onChange={setPasswordConfirm}
+                  autoComplete="new-password"
+                />
+              </label>
+            </>
+          )}
+
           {info && !error && <p className="text-sm text-accent">{info}</p>}
           {error && <p className="text-sm text-red-600">{error}</p>}
           <button type="submit" disabled={loading || !emailVerified} className="btn-accent">
-            {loading ? "가입 중..." : "회원가입"}
+            {loading ? "변경 중..." : "비밀번호 변경"}
           </button>
         </form>
         <p className="mt-6 text-sm text-subtle">
-          이미 계정이 있나요?{" "}
           <Link href="/login" className="font-medium text-accent hover:text-accent-hover">
-            로그인
+            로그인으로 돌아가기
           </Link>
         </p>
       </div>

@@ -8,7 +8,7 @@ type PopularPostsProps = {
 
 export function PopularPosts({ posts, loading }: PopularPostsProps) {
   return (
-    <section className="rounded-2xl bg-surface p-4 md:p-6">
+    <section className="rounded-2xl bg-surface p-4 md:p-5">
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-accent">인기글</p>
@@ -21,11 +21,13 @@ export function PopularPosts({ posts, loading }: PopularPostsProps) {
       ) : posts.length === 0 ? (
         <p className="mt-6 text-sm text-muted">아직 인기글이 없습니다.</p>
       ) : (
-        <div className="-mx-1 mt-5 flex gap-4 overflow-x-auto px-1 pb-2 snap-x snap-mandatory">
+        <ul className="mt-5 space-y-3">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} compact />
+            <li key={post.id}>
+              <PostCard post={post} />
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </section>
   );

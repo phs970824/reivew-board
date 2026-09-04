@@ -22,6 +22,11 @@ type AuthContextValue = {
   token: string | null;
   ready: boolean;
   login: (email: string, password: string) => Promise<void>;
+  sendVerification: (email: string) => Promise<void>;
+  verifyCode: (email: string, code: string) => Promise<void>;
+  sendPasswordReset: (email: string) => Promise<void>;
+  verifyResetCode: (email: string, code: string) => Promise<void>;
+  resetPassword: (email: string, password: string) => Promise<void>;
   signup: (payload: {
     email: string;
     password: string;
@@ -77,6 +82,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         storeAuth(data.token, data.user);
         setToken(data.token);
         setUser(data.user);
+      },
+      async sendVerification(email) {
+        const response = await request("/api/auth/send-verification", { email });
+        const data = (await response.json()) as { message?: string };
+
+        if (!response.ok) {
+          throw new Error(data.message ?? "인증번호 발송에 실패했습니다.");
+        }
+      },
+      async verifyCode(email, code) {
+        const response = await request("/api/auth/verify-code", { email, code });
+        const data = (await response.json()) as { message?: string };
+
+        if (!response.ok) {
+          throw new Error(data.message ?? "인증번호 확인에 실패했습니다.");
+        }
+      },
+      async sendPasswordReset(email) {
+        const response = await request("/api/auth/send-password-reset", { email });
+        const data = (await response.json()) as { message?: string };
+
+        if (!response.ok) {
+          throw new Error(data.message ?? "인증번호 발송에 실패했습니다.");
+        }
+      },
+      async verifyResetCode(email, code) {
+        const response = await request("/api/auth/verify-reset-code", { email, code });
+        const data = (await response.json()) as { message?: string };
+
+        if (!response.ok) {
+          throw new Error(data.message ?? "인증번호 확인에 실패했습니다.");
+        }
+      },
+      async resetPassword(email, password) {
+        const response = await request("/api/auth/reset-password", { email, password });
+        const data = (await response.json()) as { message?: string };
+
+        if (!response.ok) {
+          throw new Error(data.message ?? "비밀번호 변경에 실패했습니다.");
+        }
       },
       async signup({ email, password, nickname }) {
         const response = await request("/api/auth/signup", {

@@ -6,8 +6,8 @@ const spec = swaggerJsdoc({
     openapi: "3.0.0",
     info: {
       title: "지역별 맛집 후기 공유 게시판 API",
-      version: "5.0.0",
-      description: "회원가입, 로그인, 이미지 업로드, 게시글 CRUD 및 인가 검증 API",
+      version: "8.0.0",
+      description: "회원가입, 이메일 인증, 로그인, 게시글 CRUD, 댓글 CRUD 및 인가 검증 API",
     },
     servers: [{ url: "http://localhost:4000" }],
     components: {
@@ -43,6 +43,17 @@ const spec = swaggerJsdoc({
               },
             },
           ],
+        },
+        Comment: {
+          type: "object",
+          properties: {
+            id: { type: "integer" },
+            post_id: { type: "integer" },
+            user_id: { type: "integer" },
+            content: { type: "string" },
+            created_at: { type: "string", format: "date-time" },
+            nickname: { type: "string" },
+          },
         },
       },
     },

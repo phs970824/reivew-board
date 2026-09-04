@@ -54,7 +54,7 @@ const POST_LIST_FIELDS = `
   r.name AS region_name
 `;
 
-async function findAllPosts(regionId) {
+async function findAllPosts({ regionId, page, limit }) {
   const params = [];
   let where = "";
 
@@ -63,6 +63,17 @@ async function findAllPosts(regionId) {
     where = "WHERE p.region_id = $1";
   }
 
+  const countResult = await pool.query(
+    `SELECT COUNT(*)::int AS total FROM posts p ${where}`,
+    params,
+  );
+  const totalCount = countResult.rows[0]?.total ?? 0;
+
+  const offset = (page - 1) * limit;
+  const listParams = [...params, limit, offset];
+  const limitPlaceholder = `$${params.length + 1}`;
+  const offsetPlaceholder = `$${params.length + 2}`;
+
   const result = await pool.query(
     `
       SELECT
@@ -70,11 +81,13 @@ async function findAllPosts(regionId) {
       ${POST_FROM}
       ${where}
       ORDER BY p.created_at DESC
+      LIMIT ${limitPlaceholder}
+      OFFSET ${offsetPlaceholder}
     `,
-    params,
+    listParams,
   );
 
-  return result.rows;
+  return { posts: result.rows, totalCount };
 }
 
 async function findPopularPosts(limit = 5) {
@@ -155,11 +168,55 @@ async function deletePost(id) {
   return result.rows[0] ?? null;
 }
 
+async function findGalleryPosts(limit = 9) {
+  const result = await pool.query(
+    `
+      SELECT p.id, p.title, p.restaurant_name, p.image_url, p.content
+      FROM posts p
+      WHERE
+        (p.image_url IS NOT NULL AND BTRIM(p.image_url) <> '')
+        OR p.content ILIKE '%<img%'
+        OR p.content ~* 'https?://\\S+\\.(png|jpe?g|gif|webp|avif)'
+      ORDER BY p.created_at DESC
+      LIMIT 30
+    `,
+  );
+
+  const items = [];
+  for (const row of result.rows) {
+    const imageUrl =
+      String(row.image_url ?? "").trim() ||
+      String(row.content ?? "").match(/<img[^>]+src=["']([^"']+)["']/i)?.[1] ||
+      String(row.content ?? "").match(
+        /https?:\/\/[^\s"'<>]+\.(?:png|jpe?g|gif|webp|avif)/i,
+      )?.[0] ||
+      null;
+
+    if (!imageUrl) {
+      continue;
+    }
+
+    items.push({
+      id: row.id,
+      title: row.title,
+      restaurantName: row.restaurant_name,
+      imageUrl,
+    });
+
+    if (items.length >= limit) {
+      break;
+    }
+  }
+
+  return items;
+}
+
 module.exports = {
   ensurePostsTable,
   createPost,
   findAllPosts,
   findPopularPosts,
+  findGalleryPosts,
   findPostById,
   updatePost,
   deletePost,

@@ -2,6 +2,7 @@ const {
   createPost,
   findAllPosts,
   findPopularPosts,
+  findGalleryPosts,
   findPostById,
   updatePost,
   deletePost,
@@ -82,14 +83,29 @@ async function create(req, res) {
 
 async function list(req, res) {
   const regionId = req.query.region_id ? Number(req.query.region_id) : null;
+  const page = Math.max(parseInt(String(req.query.page ?? "1"), 10) || 1, 1);
+  const limit = Math.min(
+    Math.max(parseInt(String(req.query.limit ?? "6"), 10) || 6, 1),
+    50,
+  );
 
   if (req.query.region_id && !regionId) {
     return res.status(400).json({ message: "지역 값이 올바르지 않습니다." });
   }
 
   try {
-    const posts = await findAllPosts(regionId);
-    return res.json({ posts });
+    const { posts, totalCount } = await findAllPosts({ regionId, page, limit });
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return res.json({
+      posts,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalCount,
+        limit,
+      },
+    });
   } catch (error) {
     console.error("게시글 목록 실패:", error);
     return res.status(500).json({ message: "게시글을 불러오지 못했습니다." });
@@ -157,6 +173,16 @@ async function remove(req, res) {
   }
 }
 
+async function gallery(req, res) {
+  try {
+    const posts = await findGalleryPosts(9);
+    return res.json({ posts });
+  } catch (error) {
+    console.error("갤러리 목록 실패:", error);
+    return res.status(500).json({ message: "갤러리를 불러오지 못했습니다." });
+  }
+}
+
 async function detail(req, res) {
   const id = parsePostId(req.params.id);
   if (!id) {
@@ -185,4 +211,4 @@ async function listRegions(req, res) {
   }
 }
 
-module.exports = { create, list, popular, detail, update, remove, listRegions };
+module.exports = { create, list, popular, gallery, detail, update, remove, listRegions };

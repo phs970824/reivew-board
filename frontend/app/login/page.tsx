@@ -5,6 +5,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { EMAIL_PATTERN } from "@/lib/validation";
+import { PasswordField } from "@/components/PasswordField";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -62,11 +63,9 @@ export default function LoginPage() {
           </label>
           <label className="block">
             <span className="text-sm text-muted">비밀번호</span>
-            <input
-              type="password"
+            <PasswordField
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="field-input"
+              onChange={setPassword}
               autoComplete="current-password"
             />
           </label>
@@ -75,7 +74,12 @@ export default function LoginPage() {
             {loading ? "로그인 중..." : "로그인"}
           </button>
         </form>
-        <p className="mt-6 text-sm text-subtle">
+        <p className="mt-4 text-sm text-subtle">
+          <Link href="/forgot-password" className="font-medium text-accent hover:text-accent-hover">
+            비밀번호 찾기
+          </Link>
+        </p>
+        <p className="mt-4 text-sm text-subtle">
           아직 계정이 없나요?{" "}
           <Link href="/signup" className="font-medium text-accent hover:text-accent-hover">
             회원가입

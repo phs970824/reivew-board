@@ -1,6 +1,6 @@
 const express = require("express");
 const { authMiddleware } = require("../middlewares/auth");
-const { create, list, popular, detail, update, remove, listRegions } = require("../controllers/postController");
+const { create, list, popular, gallery, detail, update, remove, listRegions } = require("../controllers/postController");
 
 const router = express.Router();
 
@@ -24,6 +24,20 @@ router.get("/regions", listRegions);
  *     summary: 게시글 목록
  *     parameters:
  *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: 페이지 번호
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 6
+ *         description: 한 페이지당 게시글 수
+ *       - in: query
  *         name: region_id
  *         required: false
  *         schema:
@@ -31,7 +45,7 @@ router.get("/regions", listRegions);
  *         description: 지역 ID. 없으면 전체 조회
  *     responses:
  *       200:
- *         description: Users, Regions JOIN이 포함된 게시글 목록
+ *         description: Users, Regions JOIN이 포함된 페이징 게시글 목록
  *         content:
  *           application/json:
  *             schema:
@@ -41,6 +55,17 @@ router.get("/regions", listRegions);
  *                   type: array
  *                   items:
  *                     $ref: "#/components/schemas/PostListItem"
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                     totalCount:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
  *   post:
  *     tags: [Posts]
  *     summary: 게시글 작성
@@ -194,6 +219,36 @@ router.get("/regions", listRegions);
  *       404:
  *         description: 게시글 없음
  */
+/**
+ * @openapi
+ * /api/posts/gallery:
+ *   get:
+ *     tags: [Posts]
+ *     summary: 실시간 맛집 갤러리
+ *     description: 대표 이미지(image_url)가 있거나 본문에 img 태그가 있는 최신 게시글 9개를 반환합니다.
+ *     responses:
+ *       200:
+ *         description: 갤러리 게시글 목록
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 posts:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       title:
+ *                         type: string
+ *                       restaurantName:
+ *                         type: string
+ *                       imageUrl:
+ *                         type: string
+ */
+router.get("/posts/gallery", gallery);
 router.get("/posts/popular", popular);
 router.get("/posts", list);
 router.get("/posts/:id", detail);

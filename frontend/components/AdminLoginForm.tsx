@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { PasswordField } from "@/components/PasswordField";
 
 export function AdminLoginForm() {
   const router = useRouter();
@@ -41,11 +42,9 @@ export function AdminLoginForm() {
     <form onSubmit={onSubmit} className="mt-8 space-y-5">
       <label className="block">
         <span className="text-sm text-muted">관리자 비밀번호</span>
-        <input
-          type="password"
+        <PasswordField
           value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          className="field-input"
+          onChange={setPassword}
           autoComplete="current-password"
           required
         />

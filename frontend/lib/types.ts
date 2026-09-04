@@ -18,3 +18,26 @@ export type PostSummary = {
 export type PostDetail = PostSummary & {
   content: string;
 };
+
+export type GalleryPost = {
+  id: number;
+  title: string;
+  restaurantName: string;
+  imageUrl: string;
+};
+
+export type Pagination = {
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  limit: number;
+};
+
+export type Comment = {
+  id: number;
+  post_id: number;
+  user_id: number;
+  content: string;
+  created_at: string;
+  nickname: string;
+};

@@ -6,9 +6,12 @@ const { testConnection, connectWithRetry } = require("./src/config/db");
 const { ensureUsersTable } = require("./src/models/user");
 const { ensureRegionsTable } = require("./src/models/region");
 const { ensurePostsTable } = require("./src/models/post");
+const { ensureCommentsTable } = require("./src/models/comment");
+const { ensureEmailVerificationsTable } = require("./src/models/emailVerification");
 const authRoutes = require("./src/routes/auth");
 const uploadRoutes = require("./src/routes/upload");
 const postRoutes = require("./src/routes/posts");
+const commentRoutes = require("./src/routes/comments");
 const { setupSwagger } = require("./src/config/swagger");
 
 const app = express();
@@ -20,7 +23,7 @@ app.use(express.json({ limit: "2mb" }));
 app.get("/", (req, res) => {
   res.json({
     message: "지역별 맛집 후기 공유 게시판 API",
-    stage: 5,
+    stage: 8,
   });
 });
 
@@ -38,6 +41,7 @@ app.get("/health", async (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api", commentRoutes);
 app.use("/api", postRoutes);
 setupSwagger(app);
 
@@ -48,9 +52,11 @@ app.listen(PORT, async () => {
   if (db.connected) {
     try {
       await ensureUsersTable();
+      await ensureEmailVerificationsTable();
       await ensureRegionsTable();
       await ensurePostsTable();
-      console.log("users, regions, posts 테이블 준비 완료");
+      await ensureCommentsTable();
+      console.log("users, email_verifications, regions, posts, comments 테이블 준비 완료");
     } catch (error) {
       console.error("테이블 준비 실패:", error.message);
     }

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PageLoading } from "@/components/PageLoading";
 import { PostNotFound } from "@/components/PostNotFound";
+import { CommentSection } from "@/components/CommentSection";
 import { API_URL } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatDate } from "@/lib/date";
@@ -146,6 +147,7 @@ export default function PostDetailPage() {
             className="post-body mt-8"
             dangerouslySetInnerHTML={{ __html: safeHtml }}
           />
+          <CommentSection postId={post.id} />
           <Link href="/" className="btn-quiet mt-10 self-start px-0">
             목록으로
           </Link>
