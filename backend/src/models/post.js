@@ -90,8 +90,14 @@ async function findAllPosts({ regionId, page, limit }) {
   return { posts: result.rows, totalCount };
 }
 
-async function findPopularPosts(limit = 5) {
-  const safeLimit = Math.min(Math.max(Number(limit) || 5, 3), 5);
+async function findPopularPosts({ page = 1, limit = 5 } = {}) {
+  const safeLimit = Math.min(Math.max(Number(limit) || 5, 1), 50);
+  const safePage = Math.max(Number(page) || 1, 1);
+  const offset = (safePage - 1) * safeLimit;
+
+  const countResult = await pool.query("SELECT COUNT(*)::int AS total FROM posts");
+  const totalCount = countResult.rows[0]?.total ?? 0;
+
   const result = await pool.query(
     `
       SELECT
@@ -101,11 +107,12 @@ async function findPopularPosts(limit = 5) {
         (p.image_url IS NOT NULL) DESC,
         p.created_at DESC
       LIMIT $1
+      OFFSET $2
     `,
-    [safeLimit],
+    [safeLimit, offset],
   );
 
-  return result.rows;
+  return { posts: result.rows, totalCount };
 }
 
 async function findPostById(id) {

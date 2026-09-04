@@ -1,11 +1,12 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PostForm } from "@/components/PostForm";
 import { API_URL } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import type { Region } from "@/lib/types";
+import type { PostDetail, Region } from "@/lib/types";
 
 export default function WritePage() {
   const router = useRouter();
@@ -64,10 +65,18 @@ export default function WritePage() {
           content,
         }),
       });
-      const data = (await response.json()) as { message?: string };
+      const data = (await response.json()) as {
+        message?: string;
+        post?: PostDetail;
+      };
 
       if (!response.ok) {
         throw new Error(data.message ?? "게시글 등록에 실패했습니다.");
+      }
+
+      if (data.post?.id) {
+        router.push(`/posts/${data.post.id}`);
+        return;
       }
 
       router.push("/");
@@ -84,6 +93,9 @@ export default function WritePage() {
 
   return (
     <main className="mx-auto flex w-full max-w-[720px] flex-1 flex-col px-5 pb-20 pt-6">
+      <Link href="/" className="mb-6 self-start text-sm text-muted hover:text-foreground">
+        ← 목록으로
+      </Link>
       <p className="page-label">후기 작성</p>
       <h1 className="mt-3 text-3xl font-semibold tracking-tight">맛집 기록하기</h1>
       <p className="mt-3 text-sm leading-relaxed text-muted">

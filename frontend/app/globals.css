@@ -20,12 +20,21 @@
   --color-accent-hover: var(--accent-hover);
   --color-surface: var(--surface);
   --color-field: var(--field);
+  --font-sans: var(--font-noto-sans-kr), "Noto Sans KR", sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+  font-family: var(--font-noto-sans-kr), "Noto Sans KR", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.noto-sans-kr {
+  font-family: var(--font-noto-sans-kr), "Noto Sans KR", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
 @layer components {
@@ -87,6 +96,10 @@ body {
   font-style: normal;
 }
 
+.ql-editor.ql-composing::before {
+  display: none;
+}
+
 .ql-editor img {
   max-width: 100%;
   border-radius: 12px;
@@ -94,7 +107,7 @@ body {
 
 .post-body {
   font-size: 16px;
-  line-height: 1.7;
+  line-height: 1.85;
   color: var(--foreground);
 }
 
@@ -107,7 +120,6 @@ body {
   max-width: 100%;
   height: auto;
   margin: 1em 0;
-  border-radius: 12px;
 }
 
 .post-body h1,

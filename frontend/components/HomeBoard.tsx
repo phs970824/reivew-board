@@ -9,7 +9,8 @@ import { RegionPicker } from "@/components/RegionPicker";
 import { API_URL } from "@/lib/api";
 import type { GalleryPost, Pagination, PostSummary, Region } from "@/lib/types";
 
-const PAGE_LIMIT = 6;
+const PAGE_LIMIT = 4;
+const POPULAR_LIMIT = 5;
 
 export function HomeBoard() {
   const [regions, setRegions] = useState<Region[]>([]);
@@ -18,6 +19,8 @@ export function HomeBoard() {
   const [posts, setPosts] = useState<PostSummary[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [popular, setPopular] = useState<PostSummary[]>([]);
+  const [popularPage, setPopularPage] = useState(1);
+  const [popularPagination, setPopularPagination] = useState<Pagination | null>(null);
   const [gallery, setGallery] = useState<GalleryPost[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [loadingPopular, setLoadingPopular] = useState(true);
@@ -61,13 +64,25 @@ export function HomeBoard() {
     async function loadPopular() {
       setLoadingPopular(true);
       try {
-        const response = await fetch(`${API_URL}/api/posts/popular`);
-        const data = (await response.json()) as { posts?: PostSummary[] };
+        const params = new URLSearchParams({
+          page: String(popularPage),
+          limit: String(POPULAR_LIMIT),
+        });
+        const response = await fetch(`${API_URL}/api/posts/popular?${params.toString()}`);
+        const data = (await response.json()) as {
+          posts?: PostSummary[];
+          pagination?: Pagination;
+        };
         setPopular(data.posts ?? []);
+        setPopularPagination(data.pagination ?? null);
       } finally {
         setLoadingPopular(false);
       }
     }
+    loadPopular();
+  }, [popularPage]);
+
+  useEffect(() => {
     async function loadGallery() {
       setLoadingGallery(true);
       try {
@@ -78,7 +93,6 @@ export function HomeBoard() {
         setLoadingGallery(false);
       }
     }
-    loadPopular();
     loadGallery();
   }, []);
 
@@ -91,11 +105,11 @@ export function HomeBoard() {
 
   return (
     <div className="mt-10 flex flex-col gap-6">
-      <div className="flex flex-col gap-6 md:grid md:grid-cols-2 md:items-start md:gap-6">
+      <div className="flex flex-col gap-6 md:grid md:grid-cols-2 md:items-stretch md:gap-6">
         <RegionPicker regions={regions} regionId={regionId} onChange={onRegionChange} />
 
-        <section className="rounded-2xl bg-surface p-4 md:min-h-[360px] md:p-5">
-          <p className="text-sm font-medium text-accent">선택 지역 후기</p>
+        <section className="rounded-2xl bg-surface p-4 md:min-h-[492px] md:p-5">
+          <p className="text-sm font-medium text-accent">🌍 선택 지역</p>
           <h2 className="mt-1 text-xl font-semibold tracking-tight">
             {selectedName ? `${selectedName} 맛집` : "전체 후기"}
           </h2>
@@ -124,8 +138,13 @@ export function HomeBoard() {
         </section>
       </div>
 
-      <div className="flex flex-col gap-6 md:grid md:grid-cols-2 md:items-start md:gap-6">
-        <PopularPosts posts={popular} loading={loadingPopular} />
+      <div className="flex flex-col gap-6 md:grid md:grid-cols-2 md:gap-6">
+        <PopularPosts
+          posts={popular}
+          loading={loadingPopular}
+          pagination={popularPagination}
+          onPageChange={setPopularPage}
+        />
         <PhotoGallerySection posts={gallery} loading={loadingGallery} />
       </div>
     </div>

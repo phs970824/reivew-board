@@ -35,7 +35,7 @@ router.get("/regions", listRegions);
  *         required: false
  *         schema:
  *           type: integer
- *           default: 6
+ *           default: 4
  *         description: 한 페이지당 게시글 수
  *       - in: query
  *         name: region_id
@@ -108,7 +108,20 @@ router.get("/regions", listRegions);
  *   get:
  *     tags: [Posts]
  *     summary: 인기글 목록
- *     description: 이미지가 있는 최신글을 우선해 상위 5개를 반환합니다.
+ *     description: 이미지가 있는 최신글을 우선해 페이징합니다. 기본 한 페이지 5개입니다.
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 5
  *     responses:
  *       200:
  *         description: 인기글 목록 반환
@@ -121,6 +134,17 @@ router.get("/regions", listRegions);
  *                   type: array
  *                   items:
  *                     $ref: "#/components/schemas/PostListItem"
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                     totalCount:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
  */
 /**
  * @openapi

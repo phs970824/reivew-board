@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { API_URL } from "@/lib/api";
@@ -13,6 +13,7 @@ type PostEditorProps = {
 
 export function PostEditor({ value, onChange }: PostEditorProps) {
   const quillRef = useRef<ReactQuill>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   const modules = useMemo(
     () => ({
@@ -75,14 +76,38 @@ export function PostEditor({ value, onChange }: PostEditorProps) {
     [],
   );
 
+  useEffect(() => {
+    const root = wrapRef.current?.querySelector(".ql-editor");
+    if (!root) {
+      return;
+    }
+
+    function onCompositionStart() {
+      root.classList.add("ql-composing");
+    }
+
+    function onCompositionEnd() {
+      root.classList.remove("ql-composing");
+    }
+
+    root.addEventListener("compositionstart", onCompositionStart);
+    root.addEventListener("compositionend", onCompositionEnd);
+    return () => {
+      root.removeEventListener("compositionstart", onCompositionStart);
+      root.removeEventListener("compositionend", onCompositionEnd);
+    };
+  }, []);
+
   return (
-    <ReactQuill
-      ref={quillRef}
-      theme="snow"
-      value={value}
-      onChange={onChange}
-      modules={modules}
-      placeholder="방문한 맛집 후기를 적어 주세요."
-    />
+    <div ref={wrapRef}>
+      <ReactQuill
+        ref={quillRef}
+        theme="snow"
+        value={value}
+        onChange={onChange}
+        modules={modules}
+        placeholder="방문한 맛집 후기를 적어 주세요."
+      />
+    </div>
   );
 }

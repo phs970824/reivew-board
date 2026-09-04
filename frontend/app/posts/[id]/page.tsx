@@ -105,52 +105,57 @@ export default function PostDetailPage() {
       )}
       {!loading && post && (
         <>
-          <span className="w-fit rounded-full bg-field px-3 py-1 text-xs font-medium text-accent">
-            {post.region_name}
-          </span>
-          <p className="mt-4 text-sm text-muted">{post.restaurant_name}</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">{post.title}</h1>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-subtle">
-              {post.nickname} · {formatDate(post.created_at)}
-            </p>
-            {isOwner && (
-              <div className="flex items-center gap-2">
-                <Link
-                  href={`/posts/${post.id}/edit`}
-                  className="rounded-xl bg-field px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground"
-                >
-                  수정하기
-                </Link>
-                <button
-                  type="button"
-                  onClick={onDelete}
-                  disabled={deleting}
-                  className="rounded-xl px-3 py-1.5 text-sm text-muted transition-colors hover:text-red-600 disabled:opacity-50"
-                >
-                  {deleting ? "삭제 중..." : "삭제하기"}
-                </button>
-              </div>
-            )}
-          </div>
-          {post.image_url && (
-            <div className="mt-8 overflow-hidden rounded-2xl bg-field">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={post.image_url}
-                alt={post.restaurant_name}
-                className="max-h-[420px] w-full object-cover"
-              />
-            </div>
-          )}
-          <div
-            className="post-body mt-8"
-            dangerouslySetInnerHTML={{ __html: safeHtml }}
-          />
-          <CommentSection postId={post.id} />
-          <Link href="/" className="btn-quiet mt-10 self-start px-0">
-            목록으로
+          <Link href="/" className="mb-6 self-start text-sm text-muted hover:text-foreground">
+            ← 목록으로
           </Link>
+
+          <article>
+            <p className="text-sm text-accent">
+              {post.region_name}
+              <span className="mx-1.5 text-subtle">·</span>
+              <span className="text-muted">{post.restaurant_name}</span>
+            </p>
+            <h1 className="mt-2 text-[1.75rem] font-bold leading-snug tracking-tight md:text-3xl">
+              {post.title}
+            </h1>
+
+            <div className="mt-5 flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <span
+                  aria-hidden
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#eadfd4] text-sm font-semibold text-[#6a5d50]"
+                >
+                  {post.nickname.slice(0, 1)}
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{post.nickname}</p>
+                  <p className="text-xs text-subtle">{formatDate(post.created_at)}</p>
+                </div>
+              </div>
+              {isOwner && (
+                <div className="flex shrink-0 items-center gap-3 text-sm text-muted">
+                  <Link href={`/posts/${post.id}/edit`} className="hover:text-foreground">
+                    수정
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={onDelete}
+                    disabled={deleting}
+                    className="hover:text-red-600 disabled:opacity-50"
+                  >
+                    {deleting ? "삭제 중..." : "삭제"}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div
+              className="post-body mt-8"
+              dangerouslySetInnerHTML={{ __html: safeHtml }}
+            />
+          </article>
+
+          <CommentSection postId={post.id} />
         </>
       )}
     </main>

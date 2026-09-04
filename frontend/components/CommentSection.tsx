@@ -155,10 +155,104 @@ export function CommentSection({ postId }: CommentSectionProps) {
   const loggedIn = Boolean(ready && user && token);
 
   return (
-    <section className="mt-12 border-t border-[#ece7e1] pt-8">
-      <h2 className="text-lg font-semibold tracking-tight">댓글 {comments.length}</h2>
+    <section className="mt-10 border-t border-black/8 pt-8">
+      <h2 className="text-base font-semibold">
+        댓글 <span className="text-accent">{comments.length}</span>
+      </h2>
 
-      <form onSubmit={onSubmit} className="mt-5">
+      {loading ? (
+        <p className="mt-5 text-sm text-muted">댓글을 불러오는 중...</p>
+      ) : comments.length === 0 ? (
+        <p className="mt-5 text-sm text-muted">아직 댓글이 없습니다.</p>
+      ) : (
+        <ul className="mt-5">
+          {comments.map((comment) => {
+            const isOwner = Boolean(user && user.id === comment.user_id);
+            return (
+              <li key={comment.id} className="py-5">
+                <div className="flex gap-3">
+                  <span
+                    aria-hidden
+                    className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#eadfd4] text-xs font-semibold text-[#6a5d50]"
+                  >
+                    {comment.nickname.slice(0, 1)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-baseline gap-2">
+                        <p className="truncate text-sm font-medium">{comment.nickname}</p>
+                        <p className="shrink-0 text-xs text-subtle">
+                          {formatDate(comment.created_at)}
+                        </p>
+                      </div>
+                      {isOwner && (
+                        <div className="flex shrink-0 items-center gap-3 text-xs text-muted">
+                          <button
+                            type="button"
+                            onClick={() => startEdit(comment)}
+                            disabled={savingId === comment.id || deletingId === comment.id}
+                            className="hover:text-foreground disabled:opacity-50"
+                          >
+                            수정
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onDelete(comment.id)}
+                            disabled={deletingId === comment.id || savingId === comment.id}
+                            className="hover:text-red-600 disabled:opacity-50"
+                          >
+                            {deletingId === comment.id ? "삭제 중..." : "삭제"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    {editingId === comment.id ? (
+                      <div className="mt-2">
+                        <textarea
+                          value={editContent}
+                          onChange={(event) => setEditContent(event.target.value)}
+                          rows={3}
+                          maxLength={1000}
+                          className="field-input mt-0 min-h-[80px] resize-none bg-surface"
+                        />
+                        <div className="mt-2 flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingId(null);
+                              setEditContent("");
+                            }}
+                            disabled={savingId === comment.id}
+                            className="rounded-lg px-3 py-1.5 text-xs text-muted"
+                          >
+                            취소
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onSaveEdit(comment.id)}
+                            disabled={savingId === comment.id || !editContent.trim()}
+                            className="rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+                          >
+                            {savingId === comment.id ? "저장 중..." : "수정 완료"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed">
+                        {comment.content}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+
+      <form onSubmit={onSubmit} className="mt-4">
         <textarea
           value={content}
           onChange={(event) => setContent(event.target.value)}
@@ -170,7 +264,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
               ? "댓글을 입력해 주세요."
               : "로그인 후 댓글을 작성할 수 있습니다"
           }
-          className="field-input mt-0 min-h-[96px] resize-none disabled:cursor-not-allowed disabled:opacity-60"
+          className="field-input mt-0 min-h-[88px] resize-none bg-surface disabled:cursor-not-allowed disabled:opacity-60"
         />
         <div className="mt-3 flex items-center justify-between gap-3">
           {!loggedIn ? (
@@ -186,94 +280,12 @@ export function CommentSection({ postId }: CommentSectionProps) {
           <button
             type="submit"
             disabled={!loggedIn || submitting || !content.trim()}
-            className="shrink-0 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
+            className="shrink-0 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
           >
             {submitting ? "등록 중..." : "등록"}
           </button>
         </div>
       </form>
-
-      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
-
-      {loading ? (
-        <p className="mt-6 text-sm text-muted">댓글을 불러오는 중...</p>
-      ) : comments.length === 0 ? (
-        <p className="mt-6 text-sm text-muted">아직 댓글이 없습니다.</p>
-      ) : (
-        <ul className="mt-6 space-y-4">
-          {comments.map((comment) => {
-            const isOwner = Boolean(user && user.id === comment.user_id);
-            return (
-              <li key={comment.id} className="rounded-2xl bg-surface px-4 py-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <p className="truncate text-sm font-medium">{comment.nickname}</p>
-                    <p className="shrink-0 text-xs text-subtle">
-                      {formatDate(comment.created_at)}
-                    </p>
-                  </div>
-                  {isOwner && (
-                    <div className="flex shrink-0 items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => startEdit(comment)}
-                        disabled={savingId === comment.id || deletingId === comment.id}
-                        className="rounded-xl px-2 py-1 text-xs text-muted transition-colors hover:text-foreground disabled:opacity-50"
-                      >
-                        수정
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onDelete(comment.id)}
-                        disabled={deletingId === comment.id || savingId === comment.id}
-                        className="rounded-xl px-2 py-1 text-xs text-muted transition-colors hover:text-red-600 disabled:opacity-50"
-                      >
-                        {deletingId === comment.id ? "삭제 중..." : "삭제"}
-                      </button>
-                    </div>
-                  )}
-                </div>
-                {editingId === comment.id ? (
-                  <div className="mt-2">
-                    <textarea
-                      value={editContent}
-                      onChange={(event) => setEditContent(event.target.value)}
-                      rows={3}
-                      maxLength={1000}
-                      className="field-input mt-0 min-h-[80px] resize-none"
-                    />
-                    <div className="mt-2 flex justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingId(null);
-                          setEditContent("");
-                        }}
-                        disabled={savingId === comment.id}
-                        className="rounded-xl px-3 py-1.5 text-xs text-muted"
-                      >
-                        취소
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onSaveEdit(comment.id)}
-                        disabled={savingId === comment.id || !editContent.trim()}
-                        className="rounded-xl bg-accent px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
-                      >
-                        {savingId === comment.id ? "저장 중..." : "수정 완료"}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed">
-                    {comment.content}
-                  </p>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
     </section>
   );
 }

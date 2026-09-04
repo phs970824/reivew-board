@@ -85,7 +85,7 @@ async function list(req, res) {
   const regionId = req.query.region_id ? Number(req.query.region_id) : null;
   const page = Math.max(parseInt(String(req.query.page ?? "1"), 10) || 1, 1);
   const limit = Math.min(
-    Math.max(parseInt(String(req.query.limit ?? "6"), 10) || 6, 1),
+    Math.max(parseInt(String(req.query.limit ?? "4"), 10) || 4, 1),
     50,
   );
 
@@ -113,9 +113,25 @@ async function list(req, res) {
 }
 
 async function popular(req, res) {
+  const page = Math.max(parseInt(String(req.query.page ?? "1"), 10) || 1, 1);
+  const limit = Math.min(
+    Math.max(parseInt(String(req.query.limit ?? "5"), 10) || 5, 1),
+    50,
+  );
+
   try {
-    const posts = await findPopularPosts(5);
-    return res.json({ posts });
+    const { posts, totalCount } = await findPopularPosts({ page, limit });
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return res.json({
+      posts,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalCount,
+        limit,
+      },
+    });
   } catch (error) {
     console.error("인기글 목록 실패:", error);
     return res.status(500).json({ message: "인기글을 불러오지 못했습니다." });

@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { PageLoading } from "@/components/PageLoading";
 import { PostForm } from "@/components/PostForm";
@@ -138,6 +139,9 @@ export default function EditPostPage() {
       )}
       {ready && !loading && allowed && (
         <>
+          <Link href="/" className="mb-6 self-start text-sm text-muted hover:text-foreground">
+            ← 목록으로
+          </Link>
           <p className="page-label">후기 수정</p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight">맛집 기록 고치기</h1>
           <p className="mt-3 text-sm leading-relaxed text-muted">

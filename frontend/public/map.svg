@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="45 50 460 830" role="img" aria-label="대한민국 7개 권역 지역 선택 지도">
+  <style>
+    .region {
+      stroke: #fff;
+      stroke-width: 5;
+      stroke-linejoin: round;
+      cursor: pointer;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: filter .2s ease, transform .2s ease, opacity .2s ease;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+    .region:hover,
+    .region.active {
+      filter: brightness(.88) drop-shadow(0 5px 7px rgba(0,0,0,.18));
+      transform: scale(1.025);
+    }
+    .region:focus {
+      outline: none;
+    }
+    .region:focus-visible {
+      outline: 2px solid #ff6b00;
+      outline-offset: 3px;
+    }
+    .label {
+      pointer-events: none;
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      font-size: 25px;
+      font-weight: 700;
+      fill: #222;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    .seoul { fill:#ff5b4d; }
+    .gyeonggi { fill:#ffb84d; }
+    .gangwon { fill:#8ed16f; }
+    .chungcheong { fill:#9b8cf5; }
+    .jeolla { fill:#5fa8ed; }
+    .gyeongsang { fill:#ffad68; }
+    .jeju { fill:#52c7b5; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .region { transition:none; }
+    }
+  </style>
+
+  <!-- 서울 -->
+  <path id="seoul" class="region seoul"
+    d="M238 116
+       C222 104 224 82 242 72
+       C261 62 285 68 293 86
+       C301 104 289 121 272 128
+       C258 134 246 129 238 116 Z"
+    tabindex="0" aria-label="서울"/>
+
+  <!-- 경기 -->
+  <path id="gyeonggi" class="region gyeonggi"
+    d="M219 132
+       C194 132 176 150 178 174
+       C180 198 194 211 184 231
+       C173 254 184 281 207 292
+       C231 303 251 291 269 302
+       C291 315 322 304 329 278
+       C336 252 321 235 332 214
+       C343 192 329 165 306 157
+       C288 151 279 137 261 132
+       C246 128 233 132 219 132 Z"
+    tabindex="0" aria-label="경기"/>
+
+  <!-- 강원 -->
+  <path id="gangwon" class="region gangwon"
+    d="M293 82
+       C320 65 352 69 380 87
+       C406 104 429 126 447 154
+       C464 181 478 210 474 240
+       C471 270 452 295 431 316
+       C410 337 390 346 367 330
+       C345 315 333 294 329 273
+       C326 253 337 235 333 214
+       C330 194 315 179 305 159
+       C294 137 279 115 282 98
+       C284 91 288 86 293 82 Z"
+    tabindex="0" aria-label="강원"/>
+
+  <!-- 충청 -->
+  <path id="chungcheong" class="region chungcheong"
+    d="M177 292
+       C193 278 215 281 235 292
+       C254 302 271 310 291 304
+       C314 297 331 305 338 325
+       C345 344 337 361 348 377
+       C359 394 348 414 327 420
+       C306 426 288 416 269 423
+       C249 430 226 423 211 410
+       C196 397 180 397 163 390
+       C141 381 129 360 135 340
+       C141 320 159 305 177 292 Z"
+    tabindex="0" aria-label="충청"/>
+
+  <!-- 전라 -->
+  <path id="jeolla" class="region jeolla"
+    d="M162 389
+       C184 396 198 409 211 421
+       C227 436 247 443 250 464
+       C253 484 239 497 238 517
+       C237 540 251 558 245 580
+       C239 604 222 621 210 643
+       C197 667 184 693 159 706
+       C136 718 112 708 101 687
+       C90 665 96 644 86 624
+       C76 603 58 587 59 563
+       C60 540 77 525 75 501
+       C73 477 61 458 71 436
+       C80 415 101 408 120 402
+       C135 397 148 392 162 389 Z"
+    tabindex="0" aria-label="전라"/>
+
+  <!-- 경상 -->
+  <path id="gyeongsang" class="region gyeongsang"
+    d="M348 377
+       C367 365 388 357 407 361
+       C429 366 441 382 447 403
+       C454 427 470 444 475 467
+       C480 490 472 512 478 534
+       C485 559 479 585 463 603
+       C446 622 427 634 416 657
+       C405 679 395 702 376 716
+       C356 731 331 724 318 706
+       C305 689 307 666 297 647
+       C286 627 266 613 258 592
+       C250 572 257 551 247 530
+       C238 509 239 486 250 465
+       C260 445 277 429 295 421
+       C314 412 331 397 348 377 Z"
+    tabindex="0" aria-label="경상"/>
+
+  <!-- 제주 -->
+  <path id="jeju" class="region jeju"
+    d="M216 790
+       C233 775 260 770 285 777
+       C309 784 328 800 327 818
+       C326 837 305 849 280 855
+       C254 862 225 860 207 848
+       C190 837 194 809 216 790 Z"
+    tabindex="0" aria-label="제주"/>
+
+  <!-- 라벨 -->
+  <text class="label" x="258" y="101">서울</text>
+  <text class="label" x="253" y="224">경기</text>
+  <text class="label" x="393" y="194">강원</text>
+  <text class="label" x="239" y="354">충청</text>
+  <text class="label" x="153" y="544">전라</text>
+  <text class="label" x="374" y="525">경상</text>
+  <text class="label" x="260" y="818">제주</text>
+
+  <script><![CDATA[
+    const regions = document.querySelectorAll('.region');
+    regions.forEach(region => {
+      region.addEventListener('click', () => {
+        regions.forEach(r => r.classList.remove('active'));
+        region.classList.add('active');
+        document.dispatchEvent(new CustomEvent('regionSelect', {
+          detail: { region: region.id }
+        }));
+      });
+      region.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          region.click();
+        }
+      });
+    });
+  ]]></script>
+</svg>
