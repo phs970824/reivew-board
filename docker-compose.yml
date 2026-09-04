@@ -1,24 +1,22 @@
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: restaurant-mysql
+  postgres:
+    image: postgres:16
+    container_name: restaurant-postgres
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-restaurant_board}
-      MYSQL_USER: ${MYSQL_USER:-appuser}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-apppassword}
+      POSTGRES_DB: ${POSTGRES_DB:-restaurant_board}
+      POSTGRES_USER: ${POSTGRES_USER:-appuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-apppassword}
     ports:
-      - "${MYSQL_PORT:-3306}:3306"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-prootpassword"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-appuser} -d ${POSTGRES_DB:-restaurant_board}"]
       interval: 5s
       timeout: 5s
       retries: 20
-      start_period: 20s
+      start_period: 10s
     networks:
       - restaurant-net
 
@@ -32,13 +30,13 @@ services:
       - "${BACKEND_PORT:-4000}:4000"
     environment:
       PORT: 4000
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_USER: ${MYSQL_USER:-appuser}
-      DB_PASSWORD: ${MYSQL_PASSWORD:-apppassword}
-      DB_NAME: ${MYSQL_DATABASE:-restaurant_board}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-appuser}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-apppassword}
+      DB_NAME: ${POSTGRES_DB:-restaurant_board}
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     volumes:
       - ./backend:/app
@@ -55,7 +53,7 @@ services:
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://127.0.0.1:4000}
       WATCHPACK_POLLING: "true"
     depends_on:
       - backend
@@ -67,7 +65,7 @@ services:
       - restaurant-net
 
 volumes:
-  mysql_data:
+  postgres_data:
   backend_node_modules:
   frontend_node_modules:
   frontend_next:

@@ -1,7 +1,3 @@
-CREATE DATABASE IF NOT EXISTS restaurant_board
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-
-CREATE USER IF NOT EXISTS 'appuser'@'localhost' IDENTIFIED BY 'apppassword';
-GRANT ALL PRIVILEGES ON restaurant_board.* TO 'appuser'@'localhost';
-FLUSH PRIVILEGES;
+-- postgres 슈퍼유저로 실행
+CREATE USER appuser WITH PASSWORD 'apppassword';
+CREATE DATABASE restaurant_board OWNER appuser;

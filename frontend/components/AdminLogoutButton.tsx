@@ -12,11 +12,7 @@ export function AdminLogoutButton() {
   }
 
   return (
-    <button
-      type="button"
-      onClick={logout}
-      className="text-sm text-zinc-500 underline-offset-2 hover:underline"
-    >
+    <button type="button" onClick={logout} className="btn-quiet shrink-0">
       로그아웃
     </button>
   );

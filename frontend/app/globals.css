@@ -1,26 +1,102 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7f4f1;
+  --foreground: #1a1a1a;
+  --muted: #6f6a64;
+  --subtle: #9a948c;
+  --accent: #ff6b00;
+  --accent-hover: #e85f00;
+  --surface: #ffffff;
+  --field: #efebe6;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-surface: var(--surface);
+  --color-field: var(--field);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+}
+
+@layer components {
+  .page-label {
+    @apply text-sm font-medium tracking-wide text-accent;
+  }
+
+  .field-input {
+    @apply mt-2 w-full rounded-xl bg-field px-4 py-3 text-sm outline-none transition-shadow placeholder:text-subtle focus:bg-surface focus:shadow-[0_0_0_2px_#FF6B00];
+  }
+
+  .btn-accent {
+    @apply w-full rounded-xl bg-accent px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50;
+  }
+
+  .btn-quiet {
+    @apply rounded-xl px-3 py-2 text-sm text-muted transition-colors hover:text-foreground;
+  }
+}
+
+.ql-toolbar.ql-snow,
+.ql-container.ql-snow {
+  border: none;
+}
+
+.ql-toolbar.ql-snow {
+  padding: 0 0 12px;
+}
+
+.ql-container.ql-snow {
+  min-height: 240px;
+  font-family: inherit;
+  font-size: 15px;
+  background: var(--field);
+  border-radius: 12px;
+}
+
+.ql-editor {
+  min-height: 240px;
+}
+
+.ql-editor.ql-blank::before {
+  color: var(--subtle);
+  font-style: normal;
+}
+
+.ql-editor img {
+  max-width: 100%;
+  border-radius: 12px;
+}
+
+.post-body {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--foreground);
+}
+
+.post-body p {
+  margin: 0 0 1em;
+}
+
+.post-body img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1em 0;
+  border-radius: 12px;
+}
+
+.post-body h1,
+.post-body h2 {
+  margin: 1.2em 0 0.5em;
+  font-weight: 600;
 }

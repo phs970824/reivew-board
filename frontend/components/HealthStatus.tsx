@@ -1,16 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { API_URL } from "@/lib/api";
 
 type HealthResponse = {
   status: string;
-  service: string;
   database: string;
   serverTime: string | null;
   error: string | null;
 };
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export function HealthStatus() {
   const [data, setData] = useState<HealthResponse | null>(null);
@@ -45,27 +43,32 @@ export function HealthStatus() {
   }, []);
 
   return (
-    <section className="mt-8 rounded-xl bg-zinc-50 p-4 dark:bg-zinc-900">
-      <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-        연동 상태
-      </h2>
-      {loading && <p className="mt-2 text-sm text-zinc-500">확인 중...</p>}
-      {error && (
-        <p className="mt-2 text-sm text-red-600">
-          Backend 연결 실패: {error}
-        </p>
-      )}
+    <section className="mt-10 space-y-3 text-sm">
+      {loading && <p className="text-muted">확인 중...</p>}
+      {error && <p className="text-red-600">Backend 연결 실패: {error}</p>}
       {data && (
-        <ul className="mt-2 space-y-1 text-sm text-zinc-600 dark:text-zinc-400">
-          <li>API: {data.status === "ok" ? "정상" : "점검 필요"}</li>
+        <ul className="space-y-2 text-muted">
           <li>
-            MySQL: {data.database === "connected" ? "연결됨" : "연결 안 됨"}
+            API{" "}
+            <span className={data.status === "ok" ? "text-accent" : "text-red-600"}>
+              {data.status === "ok" ? "정상" : "점검 필요"}
+            </span>
           </li>
-          {data.serverTime && <li>DB 시간: {data.serverTime}</li>}
+          <li>
+            PostgreSQL{" "}
+            <span
+              className={
+                data.database === "connected" ? "text-accent" : "text-red-600"
+              }
+            >
+              {data.database === "connected" ? "연결됨" : "연결 안 됨"}
+            </span>
+          </li>
+          {data.serverTime && <li>DB 시간 {data.serverTime}</li>}
           {data.error && <li className="text-red-600">{data.error}</li>}
         </ul>
       )}
-      <p className="mt-3 text-xs text-zinc-400">API: {API_URL}/health</p>
+      <p className="text-xs text-subtle">API {API_URL}/health</p>
     </section>
   );
 }

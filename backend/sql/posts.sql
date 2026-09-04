@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS posts (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  region_id INT NOT NULL REFERENCES regions(id),
+  restaurant_name VARCHAR(100) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  image_url VARCHAR(500),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
